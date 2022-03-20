@@ -45,6 +45,7 @@ vector<float>  elePFNeuIso_;
 vector<float>  elePFPUIso_;
 vector<float>  elePFClusEcalIso_;
 vector<float>  elePFClusHcalIso_;
+vector<float>  eleHEEPiso_;
 vector<float>  eleIDMVAIso_;
 vector<float>  eleIDMVANoIso_;
 vector<float>  eleR9Full5x5_;
@@ -61,6 +62,8 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("eleCharge",               &eleCharge_);
   tree->Branch("eleEn",                   &eleEn_);
   tree->Branch("eleEcalEn",               &eleEcalEn_);
+  tree->Branch("eleCalibPt",              &eleCalibPt_);
+  tree->Branch("eleCalibEn",              &eleCalibEn_);
   tree->Branch("elePt",                   &elePt_);
   tree->Branch("elePt_scale_up",          &elePt_scale_up_);
   tree->Branch("elePt_scale_dn",          &elePt_scale_dn_);
@@ -70,8 +73,6 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("eleEta",                  &eleEta_);
   tree->Branch("elePhi",                  &elePhi_);
   tree->Branch("eleR9",                   &eleR9_);
-  tree->Branch("eleCalibPt",              &eleCalibPt_);
-  tree->Branch("eleCalibEn",              &eleCalibEn_);
   tree->Branch("eleSCindex",              &eleSCindex_);
   tree->Branch("eleHoverE",               &eleHoverE_);
   tree->Branch("eleEoverP",               &eleEoverP_);
@@ -91,6 +92,7 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("elePFPUIso",              &elePFPUIso_);
   tree->Branch("elePFClusEcalIso",        &elePFClusEcalIso_);
   tree->Branch("elePFClusHcalIso",        &elePFClusHcalIso_);
+  tree->Branch("eleHEEPiso",              &eleHEEPiso_);
   tree->Branch("eleIDMVAIso",             &eleIDMVAIso_);
   tree->Branch("eleIDMVANoIso",           &eleIDMVANoIso_);
   tree->Branch("eleR9Full5x5",            &eleR9Full5x5_);
@@ -140,6 +142,7 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
   elePFPUIso_                 .clear();
   elePFClusEcalIso_           .clear();
   elePFClusHcalIso_           .clear();
+  eleHEEPiso_                 .clear();
   eleIDMVAIso_                .clear();
   eleIDMVANoIso_              .clear();
   eleR9Full5x5_               .clear();
@@ -252,7 +255,7 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
     eleIDMVANoIso_.push_back(iEle->userFloat("ElectronMVAEstimatorRun2Fall17NoIsoV2Values"));
     elePFClusEcalIso_.push_back(iEle->ecalPFClusterIso());
     elePFClusHcalIso_.push_back(iEle->hcalPFClusterIso());
-
+    eleHEEPiso_.push_back(iEle->dr03TkSumPtHEEP());
 
     if (doGenParticles_) {
       edm::Handle<vector<reco::GenParticle>> genParticlesHandle;

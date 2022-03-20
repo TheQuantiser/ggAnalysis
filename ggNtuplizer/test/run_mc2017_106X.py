@@ -17,7 +17,7 @@ process.maxEvents = cms.untracked.PSet(
     input=cms.untracked.int32(100))
 process.MessageLogger.cerr.FwkReport.reportEvery = 500
 # process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('file:/afs/hep.wisc.edu/user/wadud/private/signal_production/CMSSW_10_6_29/src/genproductions/bin/MadGraph5_aMCatNLO/ZNuNuGproduction/aNTGC_ZNuNuG_MINIAODSIM.root'))
-process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17MiniAOD/ZNuNuGJets_MonoPhoton_PtG-130_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/120000/FB8BC1E9-8578-B249-9F22-7E03D0330CB0.root'))
+process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17MiniAOD/WGJets_MonoPhoton_PtG-130_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/100000/BCCE0FB2-8EF4-D14F-BCB6-19A3B3E16350.root'))
 
 print(process.source)
 
