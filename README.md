@@ -21,5 +21,5 @@ git cms-addpkg EgammaAnalysis/ElectronTools;  <br>
       
       
 
-git clone -b CMSSW_10_6_24 git@github.com:wadud001/ggAnalysis.git;<br>
+git clone -b CMSSW_10_6_24_prefiring_EGMscale_fix git@github.com:wadud001/ggAnalysis.git;<br>
 scram b -j$(nproc); <br>
