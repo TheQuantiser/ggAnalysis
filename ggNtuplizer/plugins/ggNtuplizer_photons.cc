@@ -95,7 +95,7 @@ template <class T, class U>
 bool isInFootprint(const T& thefootprint, const U& theCandidate) {
 	for ( auto itr = thefootprint.begin(); itr != thefootprint.end(); ++itr ) {
 
-		if( itr.key() == theCandidate.key() ) return true;
+		if ( itr.key() == theCandidate.key() ) return true;
 
 	}
 	return false;
@@ -103,7 +103,7 @@ bool isInFootprint(const T& thefootprint, const U& theCandidate) {
 
 
 void ggNtuplizer::branchesPhotons(TTree* tree) {
-	
+
 	tree->Branch("nPho",                      & nPho_);
 	tree->Branch("phoE",                      & phoE_);
 	tree->Branch("phoSigmaE",                 & phoSigmaE_);
@@ -113,6 +113,10 @@ void ggNtuplizer::branchesPhotons(TTree* tree) {
 	tree->Branch("phoCalibE",                 & phoCalibE_);
 	tree->Branch("phoSigmaCalibE",            & phoSigmaCalibE_);
 	tree->Branch("phoCalibEt",                & phoCalibEt_);
+	tree->Branch("phoPt_scale_up",            & phoPt_scale_up_);
+	tree->Branch("phoPt_scale_dn",            & phoPt_scale_dn_);
+	tree->Branch("phoPt_sigma_up",            & phoPt_sigma_up_);
+	tree->Branch("phoPt_sigma_dn",            & phoPt_sigma_dn_);
 	tree->Branch("phoSCindex",                & phoSCindex_);
 	tree->Branch("phoESEnP1",                 & phoESEnP1_);
 	tree->Branch("phoESEnP2",                 & phoESEnP2_);
@@ -183,13 +187,9 @@ void ggNtuplizer::branchesPhotons(TTree* tree) {
 	tree->Branch("phoMIPIntercept",           & phoMIPIntercept_);
 	tree->Branch("phoMIPNhitCone",            & phoMIPNhitCone_);
 	tree->Branch("phoIDbit",                  & phoIDbit_);
-	tree->Branch("phoPt_scale_up",          	  & phoPt_scale_up_);
-	tree->Branch("phoPt_scale_dn",              & phoPt_scale_dn_);
-	tree->Branch("phoPt_sigma_up",           	  & phoPt_sigma_up_);
-	tree->Branch("phoPt_sigma_dn",              & phoPt_sigma_dn_);
 	tree->Branch("phoNConvLegs",              & phoNConvLegs_);
 	tree->Branch("phoZVtxWithConv",           & phoZVtxWithConv_);
-	if(doGenParticles_){
+	if (doGenParticles_) {
 		tree->Branch("pho_gen_index",         & pho_gen_index_);
 	}
 }
@@ -294,7 +294,7 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 	}
 
 	edm::Handle<vector<reco::GenParticle>> genParticlesHandle;
-	if(doGenParticles_) e.getByToken(genParticlesCollection_, genParticlesHandle);
+	if (doGenParticles_) e.getByToken(genParticlesCollection_, genParticlesHandle);
 
 	edm::Handle<std::vector<reco::SuperCluster>> ecalSChandle;
 	e.getByToken(ecalSCcollection_, ecalSChandle);
@@ -327,7 +327,7 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 		std::cout << "No ConvSL not available!!!" << std::endl;
 	}
 
-	for (edm::View<pat::Photon>::const_iterator iPho = photonHandle->begin(); iPho != photonHandle->end(); ++iPho){
+	for (edm::View<pat::Photon>::const_iterator iPho = photonHandle->begin(); iPho != photonHandle->end(); ++iPho) {
 
 		phoE_           . push_back(iPho->energy());
 		phoCalibE_      . push_back(iPho->userFloat("ecalEnergyPostCorr"));
@@ -341,8 +341,8 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 		phoESEnP2_      . push_back(iPho->superCluster()->preshowerEnergyPlane2());
 
 		UChar_t _phoQualityBits = 0;
-		if(iPho->hasPixelSeed()) setbit(_phoQualityBits, 0);
-		if(iPho->passElectronVeto()) setbit(_phoQualityBits, 1);
+		if (iPho->hasPixelSeed()) setbit(_phoQualityBits, 0);
+		if (iPho->passElectronVeto()) setbit(_phoQualityBits, 1);
 		phoQualityBits_                 . push_back(_phoQualityBits);
 
 		phoR9_                     . push_back(iPho->r9());
@@ -387,7 +387,7 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 		phoE1x3Full5x5_            . push_back(iPho->full5x5_showerShapeVariables()                       . e1x3);
 		phoE1x5Full5x5_            . push_back(iPho->full5x5_showerShapeVariables()                       . e1x5);
 		phoE2x5Full5x5_            . push_back(iPho->full5x5_showerShapeVariables()                       . e2x5);
-		
+
 		phoECALIso_                . push_back(iPho->ecalIso());
 		phoHCALIso_                . push_back(iPho->hcalIso());
 
@@ -404,20 +404,20 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 
 
 		// get photon supercluster index (for looking up from the SC branches)
-		if(ecalSChandle.isValid()){
+		if (ecalSChandle.isValid()) {
 			const reco::SuperCluster * _tmpPhoSC = (iPho->superCluster().isAvailable()) ? iPho->superCluster().get() : nullptr;
 			Short_t tmpPhoSCindex = (_tmpPhoSC == nullptr) ? -999 : std::distance(ecalSChandle->begin(), (std::vector<reco::SuperCluster>::const_iterator) _tmpPhoSC);
 			phoSCindex_.push_back(tmpPhoSCindex);
 		}
 
 		UChar_t tmpphoFiducialRegion = 0;
-		if(iPho->isEB()) setbit(tmpphoFiducialRegion, 0);
-		if(iPho->isEE()) setbit(tmpphoFiducialRegion, 1);
-		if(iPho->isEBEEGap()) setbit(tmpphoFiducialRegion, 2);
-		if(iPho->isEBEtaGap ()) setbit(tmpphoFiducialRegion, 3);
-		if(iPho->isEBPhiGap ()) setbit(tmpphoFiducialRegion, 4);
-		if(iPho->isEEDeeGap ()) setbit(tmpphoFiducialRegion, 5);
-		if(iPho->isEERingGap()) setbit(tmpphoFiducialRegion, 6);
+		if (iPho->isEB()) setbit(tmpphoFiducialRegion, 0);
+		if (iPho->isEE()) setbit(tmpphoFiducialRegion, 1);
+		if (iPho->isEBEEGap()) setbit(tmpphoFiducialRegion, 2);
+		if (iPho->isEBEtaGap ()) setbit(tmpphoFiducialRegion, 3);
+		if (iPho->isEBPhiGap ()) setbit(tmpphoFiducialRegion, 4);
+		if (iPho->isEEDeeGap ()) setbit(tmpphoFiducialRegion, 5);
+		if (iPho->isEERingGap()) setbit(tmpphoFiducialRegion, 6);
 		phoFiducialRegion_  .push_back(tmpphoFiducialRegion);
 
 
@@ -435,7 +435,7 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 		phoIDbit_.push_back(tmpphoIDbit);
 
 		// systematics for energy scale and resolution
-		
+
 		phoPt_scale_up_ . push_back(iPho->et()*iPho->userFloat("energyScaleUp")/iPho->energy());
 		phoPt_scale_dn_ . push_back(iPho->et()*iPho->userFloat("energyScaleDown")/iPho->energy());
 		phoPt_sigma_up_  . push_back(iPho->et()*iPho->userFloat("energySigmaUp")/iPho->energy());
@@ -448,7 +448,7 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 		if (theSeedHit != rechits->end()) {
 			phoSeedTime_.push_back(theSeedHit->time());
 			phoSeedEnergy_.push_back(theSeedHit->energy());
-		} else{
+		} else {
 			phoSeedTime_  .push_back(-99.);
 			phoSeedEnergy_.push_back(-99.);
 		}
@@ -466,11 +466,11 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 		phoE5x5Full5x5_          . push_back(iPho->full5x5_e5x5());
 		phoR9Full5x5_            . push_back(iPho->full5x5_r9());
 
-		if(doGenParticles_){
-		  const reco::GenParticle * phoGen_ = iPho->genParticle(); // I don't know what matching algoritm is used - https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2017#MC_Truth
-		  Short_t phoGenPos_ = (phoGen_ == nullptr) ? -999 : std::distance(genParticlesHandle->begin(), (std::vector<reco::GenParticle>::const_iterator) phoGen_);
-		  // if(phoGenPos_>=0) std::cout<<"pho->genParticle->pdgID "<<phoGen_->pdgId()<<" prunedGenParticle("<<phoGenPos_<<")->pdgid() "<< (&*genParticlesHandle->begin()+phoGenPos_)->pdgId()<<std::endl;
-		  pho_gen_index_.push_back(phoGenPos_);
+		if (doGenParticles_) {
+			const reco::GenParticle * phoGen_ = iPho->genParticle(); // I don't know what matching algoritm is used - https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2017#MC_Truth
+			Short_t phoGenPos_ = (phoGen_ == nullptr) ? -999 : std::distance(genParticlesHandle->begin(), (std::vector<reco::GenParticle>::const_iterator) phoGen_);
+			// if(phoGenPos_>=0) std::cout<<"pho->genParticle->pdgID "<<phoGen_->pdgId()<<" prunedGenParticle("<<phoGenPos_<<")->pdgid() "<< (&*genParticlesHandle->begin()+phoGenPos_)->pdgId()<<std::endl;
+			pho_gen_index_.push_back(phoGenPos_);
 		}
 
 		phoSeedSaturationBit_.push_back(iPho->isSeedSaturated());
@@ -485,21 +485,21 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 		int nConvLegs = vIndexMatchedConversion[1];
 		double zconv = -99;
 
-		if(nConvLegs>0){
+		if (nConvLegs>0) {
 
-			if(nConvLegs==2){
+			if (nConvLegs==2) {
 				const std::vector<edm::Ptr<reco::Conversion> > & conversions = conversionHandle->ptrs();
-				zconv = vtxZFromConv( iPho, conversions[IndexMatchedConversion], beamSpot);   
+				zconv = vtxZFromConv( iPho, conversions[IndexMatchedConversion], beamSpot);
 			}
 
-			if(nConvLegs==1){
+			if (nConvLegs==1) {
 				const std::vector<edm::Ptr<reco::Conversion> > & conversions = conversionHandleSL->ptrs();
-				zconv = vtxZFromConv( iPho, conversions[IndexMatchedConversion], beamSpot);   
+				zconv = vtxZFromConv( iPho, conversions[IndexMatchedConversion], beamSpot);
 			}
 
 
 		}
-		
+
 		phoNConvLegs_.push_back(nConvLegs);
 		phoZVtxWithConv_.push_back(zconv);
 
@@ -755,7 +755,7 @@ void ggNtuplizer::fillPhotonsOOT(const edm::Event& e, const edm::EventSetup& es)
 	// EcalClusterLazyTools       lazyTool    (e, es, ebReducedRecHitCollection_, eeReducedRecHitCollection_, esReducedRecHitCollection_);
 	noZS::EcalClusterLazyTools lazyToolnoZS(e, es, ebReducedRecHitCollection_, eeReducedRecHitCollection_, esReducedRecHitCollection_);
 
-	for (edm::View<pat::Photon>::const_iterator iootPho = photonOOT_Handle->begin(); iootPho != photonOOT_Handle->end(); ++iootPho){
+	for (edm::View<pat::Photon>::const_iterator iootPho = photonOOT_Handle->begin(); iootPho != photonOOT_Handle->end(); ++iootPho) {
 
 		ootPho_E_   . push_back(iootPho->energy());
 		ootPho_Et_  . push_back(iootPho->et());
@@ -763,8 +763,8 @@ void ggNtuplizer::fillPhotonsOOT(const edm::Event& e, const edm::EventSetup& es)
 		ootPho_Phi_ . push_back(iootPho->phi());
 
 		UChar_t _ootPho_QualityBits = 0;
-		if(iootPho->hasPixelSeed()) setbit(_ootPho_QualityBits, 0);
-		if(iootPho->passElectronVeto()) setbit(_ootPho_QualityBits, 1);
+		if (iootPho->hasPixelSeed()) setbit(_ootPho_QualityBits, 0);
+		if (iootPho->passElectronVeto()) setbit(_ootPho_QualityBits, 1);
 		ootPho_QualityBits_                 . push_back(_ootPho_QualityBits);
 
 		ootPho_R9_                          . push_back(iootPho->r9());
@@ -796,24 +796,24 @@ void ggNtuplizer::fillPhotonsOOT(const edm::Event& e, const edm::EventSetup& es)
 
 
 		// get ootPho_ton supercluster index (for looking up from the SC branches)
-		if(ecalSC_OOT_handle.isValid()){
+		if (ecalSC_OOT_handle.isValid()) {
 			const reco::SuperCluster * _tmpootPho_SC = (iootPho->superCluster().isAvailable()) ? iootPho->superCluster().get() : nullptr;
 			Short_t tmpootPho_SCindex = (_tmpootPho_SC == nullptr) ? -999 : std::distance(ecalSC_OOT_handle->begin(), (std::vector<reco::SuperCluster>::const_iterator) _tmpootPho_SC);
 			ootPho_SCindex_.push_back(tmpootPho_SCindex);
-		  //check
-		  // if(tmpootPho_SCindex>=0){
-		  //   std::cout<<_tmpootPho_SC->eta()<<" "<<(ecalSChandle->begin()+tmpootPho_SCindex)->eta()<<" "<<_tmpootPho_SC->phi()<<" "<<(ecalSChandle->begin()+tmpootPho_SCindex)->phi()<<std::endl;
-		  // }
+			//check
+			// if(tmpootPho_SCindex>=0){
+			//   std::cout<<_tmpootPho_SC->eta()<<" "<<(ecalSChandle->begin()+tmpootPho_SCindex)->eta()<<" "<<_tmpootPho_SC->phi()<<" "<<(ecalSChandle->begin()+tmpootPho_SCindex)->phi()<<std::endl;
+			// }
 		}
 
 		UChar_t tmpootPho_FiducialRegion = 0;
-		if(iootPho->isEB()) setbit(tmpootPho_FiducialRegion, 0);
-		if(iootPho->isEE()) setbit(tmpootPho_FiducialRegion, 1);
-		if(iootPho->isEBEEGap()) setbit(tmpootPho_FiducialRegion, 2);
-		if(iootPho->isEBEtaGap ()) setbit(tmpootPho_FiducialRegion, 3);
-		if(iootPho->isEBPhiGap ()) setbit(tmpootPho_FiducialRegion, 4);
-		if(iootPho->isEEDeeGap ()) setbit(tmpootPho_FiducialRegion, 5);
-		if(iootPho->isEERingGap()) setbit(tmpootPho_FiducialRegion, 6);
+		if (iootPho->isEB()) setbit(tmpootPho_FiducialRegion, 0);
+		if (iootPho->isEE()) setbit(tmpootPho_FiducialRegion, 1);
+		if (iootPho->isEBEEGap()) setbit(tmpootPho_FiducialRegion, 2);
+		if (iootPho->isEBEtaGap ()) setbit(tmpootPho_FiducialRegion, 3);
+		if (iootPho->isEBPhiGap ()) setbit(tmpootPho_FiducialRegion, 4);
+		if (iootPho->isEEDeeGap ()) setbit(tmpootPho_FiducialRegion, 5);
+		if (iootPho->isEERingGap()) setbit(tmpootPho_FiducialRegion, 6);
 		ootPho_FiducialRegion_  .push_back(tmpootPho_FiducialRegion);
 
 		// VID decisions
@@ -832,7 +832,7 @@ void ggNtuplizer::fillPhotonsOOT(const edm::Event& e, const edm::EventSetup& es)
 		if (theSeedHit != rechits->end()) {
 			ootPho_SeedTime_.push_back(theSeedHit->time());
 			ootPho_SeedEnergy_.push_back(theSeedHit->energy());
-		} else{
+		} else {
 			ootPho_SeedTime_  .push_back(-99.);
 			ootPho_SeedEnergy_.push_back(-99.);
 		}
@@ -841,7 +841,7 @@ void ggNtuplizer::fillPhotonsOOT(const edm::Event& e, const edm::EventSetup& es)
 		ootPho_FiredDoubleTrgs_        . push_back(matchDoublePhotonTriggerFilters(iootPho->et(), iootPho->eta(), iootPho->phi()));
 		ootPho_FiredTripleTrgs_        . push_back(matchTriplePhotonTriggerFilters(iootPho->et(), iootPho->eta(), iootPho->phi()));
 		ootPho_FiredL1Trgs_            . push_back(matchL1TriggerFilters(iootPho->et(), iootPho->eta(), iootPho->phi()));
-		
+
 		ootPho_SigmaIEtaIEtaFull5x5_   . push_back(iootPho->full5x5_sigmaIetaIeta());
 
 		ootPho_SigmaIEtaIPhiFull5x5_   . push_back(iootPho->full5x5_showerShapeVariables().sigmaIetaIphi);
@@ -897,22 +897,22 @@ void ggNtuplizer::branchesootPhoECALSC(TTree* tree) {
 };
 
 
-void ggNtuplizer::resolvePhoECALSCindex(){
+void ggNtuplizer::resolvePhoECALSCindex() {
 	phoDirectEcalSCindex_.clear();
-	for(Short_t scIndex : phoSCindex_){
+	for (Short_t scIndex : phoSCindex_) {
 		Short_t resolvedIndex = findSecondaryIndex(scIndex, ecalSCindex_);
 		phoDirectEcalSCindex_.push_back(resolvedIndex);
 	}
 };
 
 
-void ggNtuplizer::resolveootPhoECALSCindex(){
+void ggNtuplizer::resolveootPhoECALSCindex() {
 	ootPhoDirectEcalSCindex_.clear();
-	for(Short_t ootSCIndex : ootPho_SCindex_){
+	for (Short_t ootSCIndex : ootPho_SCindex_) {
 		Short_t resolvedIndex = findSecondaryIndex(ootSCIndex, ecalootSCindex_);
 		ootPhoDirectEcalSCindex_.push_back(resolvedIndex);
 	}
-}; 
+};
 
 
 
@@ -920,28 +920,27 @@ void ggNtuplizer::resolveootPhoECALSCindex(){
 ////conversion from https://github.com/cms-analysis/flashgg/blob/dev_legacy_runII/MicroAOD/plugins/LegacyVertexSelector.cc#L111
 
 double ggNtuplizer::vtxZFromConvOnly(  edm::View<pat::Photon>::const_iterator pho, const edm::Ptr<reco::Conversion> &conversion,
-	const math::XYZPoint &beamSpot ) const
-{
+                                       const math::XYZPoint &beamSpot ) const {
 	double dz = 0;
-	if( conversion->nTracks() == 2 ) {
+	if ( conversion->nTracks() == 2 ) {
 		double r = sqrt( conversion->refittedPairMomentum().perp2() );
 		dz = ( conversion->conversionVertex().z() - beamSpot.z() )
-		-
-		( ( conversion->conversionVertex().x() - beamSpot.x() ) * conversion->refittedPair4Momentum().x() + ( conversion->conversionVertex().y() - beamSpot.y() ) *
-			conversion->refittedPair4Momentum().y() ) / r * conversion->refittedPair4Momentum().z() / r;
+		     -
+		     ( ( conversion->conversionVertex().x() - beamSpot.x() ) * conversion->refittedPair4Momentum().x() + ( conversion->conversionVertex().y() - beamSpot.y() ) *
+		       conversion->refittedPair4Momentum().y() ) / r * conversion->refittedPair4Momentum().z() / r;
 	}
-	if( conversion->nTracks() == 1 ) {
+	if ( conversion->nTracks() == 1 ) {
 		double r = sqrt( conversion->tracksPin()[0].x() * conversion->tracksPin()[0].x() + conversion->tracksPin()[0].y() * conversion->tracksPin()[0].y() );
 		dz = ( conversion->conversionVertex().z() - beamSpot.z() )
-		-
-		( ( conversion->conversionVertex().x() - beamSpot.x() ) * conversion->tracksPin()[0].x() + ( conversion->conversionVertex().y() - beamSpot.y() ) *
-			conversion->tracksPin()[0].y() ) / r * conversion->tracksPin()[0].z() / r;
+		     -
+		     ( ( conversion->conversionVertex().x() - beamSpot.x() ) * conversion->tracksPin()[0].x() + ( conversion->conversionVertex().y() - beamSpot.y() ) *
+		       conversion->tracksPin()[0].y() ) / r * conversion->tracksPin()[0].z() / r;
 	}
 	return dz + beamSpot.z();
 }
 
-double ggNtuplizer::vtxZFromConvSuperCluster( edm::View<pat::Photon>::const_iterator pho, const edm::Ptr<reco::Conversion> &conversion, const math::XYZPoint &beamSpot ) const{
-  // get the z from conversion plus SuperCluster
+double ggNtuplizer::vtxZFromConvSuperCluster( edm::View<pat::Photon>::const_iterator pho, const edm::Ptr<reco::Conversion> &conversion, const math::XYZPoint &beamSpot ) const {
+	// get the z from conversion plus SuperCluster
 	double deltaX1 =  pho->caloPosition().x() - conversion->conversionVertex().x();
 	double deltaY1 =  pho->caloPosition().y() - conversion->conversionVertex().y();
 	double deltaZ1 =  pho->caloPosition().z() - conversion->conversionVertex().z();
@@ -960,91 +959,91 @@ double ggNtuplizer::vtxZFromConv( edm::View<pat::Photon>::const_iterator pho, co
 	double ReturnValue = 0;
 
 	double perp = sqrt( conversion->conversionVertex().x() * conversion->conversionVertex().x() + conversion->conversionVertex().y() *
-		conversion->conversionVertex().y() );
+	                    conversion->conversionVertex().y() );
 
 	float nTracksConv = conversion->nTracks();
 
-	if( nTracksConv == 2 ) {
-		if( fabs( pho->superCluster()->eta() ) < 1.5 ) {
-			if( perp <= 15.0 ) {
-				if( sigma1Pix < sigma2Pix )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+	if ( nTracksConv == 2 ) {
+		if ( fabs( pho->superCluster()->eta() ) < 1.5 ) {
+			if ( perp <= 15.0 ) {
+				if ( sigma1Pix < sigma2Pix )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
-			} else if( perp > 15 && perp <= 60.0 ) {
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+			} else if ( perp > 15 && perp <= 60.0 ) {
 
-				if( sigma1Tib < sigma2Tib )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+				if ( sigma1Tib < sigma2Tib )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
 			} else {
 
-				if( sigma1Tob < sigma2Tob )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+				if ( sigma1Tob < sigma2Tob )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
 			}
 		} else {
-			if( fabs( conversion->conversionVertex().z() ) <= 50.0 ) {
+			if ( fabs( conversion->conversionVertex().z() ) <= 50.0 ) {
 
-				if( sigma1PixFwd < sigma2PixFwd )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+				if ( sigma1PixFwd < sigma2PixFwd )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
-			} else if( fabs( conversion->conversionVertex().z() ) > 50.0 && fabs( conversion->conversionVertex().z() ) <= 100.0 ) {
-				if( sigma1Tid < sigma2Tid )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+			} else if ( fabs( conversion->conversionVertex().z() ) > 50.0 && fabs( conversion->conversionVertex().z() ) <= 100.0 ) {
+				if ( sigma1Tid < sigma2Tid )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
 			} else {
 
-				if( sigma1Tec < sigma2Tec )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+				if ( sigma1Tec < sigma2Tec )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
 			}
 		}
 	}
-	if( nTracksConv == 1 ) {
-		if( fabs( pho->superCluster()->eta() ) < 1.5 ) {
-			if( perp <= 15.0 ) {
+	if ( nTracksConv == 1 ) {
+		if ( fabs( pho->superCluster()->eta() ) < 1.5 ) {
+			if ( perp <= 15.0 ) {
 
-				if( singlelegsigma1Pix < singlelegsigma2Pix )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+				if ( singlelegsigma1Pix < singlelegsigma2Pix )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
-			} else if( perp > 15 && perp <= 60.0 ) {
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+			} else if ( perp > 15 && perp <= 60.0 ) {
 
-				if( singlelegsigma1Tib < singlelegsigma2Tib )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+				if ( singlelegsigma1Tib < singlelegsigma2Tib )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
 			} else {
 
-				if( singlelegsigma1Tob < singlelegsigma2Tob )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+				if ( singlelegsigma1Tob < singlelegsigma2Tob )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
 			}
 		} else {
-			if( fabs( conversion->conversionVertex().z() ) <= 50.0 ) {
+			if ( fabs( conversion->conversionVertex().z() ) <= 50.0 ) {
 
-				if( singlelegsigma1PixFwd < singlelegsigma2PixFwd )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+				if ( singlelegsigma1PixFwd < singlelegsigma2PixFwd )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
-			} else if( fabs( conversion->conversionVertex().z() ) > 50.0 && fabs( conversion->conversionVertex().z() ) <= 100.0 ) {
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+			} else if ( fabs( conversion->conversionVertex().z() ) > 50.0 && fabs( conversion->conversionVertex().z() ) <= 100.0 ) {
 
-				if( singlelegsigma1Tid < singlelegsigma2Tid )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+				if ( singlelegsigma1Tid < singlelegsigma2Tid )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
 			} else {
 
-				if( singlelegsigma1Tec < singlelegsigma2Tec )
-					{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
+				if ( singlelegsigma1Tec < singlelegsigma2Tec )
+				{ ReturnValue = vtxZFromConvOnly( pho, conversion, beamSpot ); }
 				else
-					{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
+				{ ReturnValue = vtxZFromConvSuperCluster( pho, conversion, beamSpot ); }
 			}
 		}
 	}
@@ -1052,58 +1051,57 @@ double ggNtuplizer::vtxZFromConv( edm::View<pat::Photon>::const_iterator pho, co
 }
 
 ///select the conversion index
-std::vector<int> ggNtuplizer::IndexMatchedConversion( edm::View<pat::Photon>::const_iterator g, 
-	const  std::vector<edm::Ptr<reco::Conversion> > & conversionsVector,
-	const std::vector<edm::Ptr<reco::Conversion> > & conversionsVectorSL
-	) const
-{
+std::vector<int> ggNtuplizer::IndexMatchedConversion( edm::View<pat::Photon>::const_iterator g,
+        const  std::vector<edm::Ptr<reco::Conversion> > & conversionsVector,
+        const std::vector<edm::Ptr<reco::Conversion> > & conversionsVectorSL
+                                                    ) const {
 	double mindR = 999;
 	int nConvLegs = 0;
 	bool doOneLeg = true;
 
 	std::vector<int> result;
 	int selected_conversion_index = -1;
-	if( g->hasConversionTracks()){
+	if ( g->hasConversionTracks()) {
 
-		for( unsigned int i = 0; i < conversionsVector.size(); i++ ) {
+		for ( unsigned int i = 0; i < conversionsVector.size(); i++ ) {
 			edm::Ptr<reco::Conversion> conv = conversionsVector[i];
-			if( conv->nTracks() == 2 ) {
-				if( !conv->isConverted() ) { continue; }
-				if( conv->refittedPair4Momentum().pt() < 10. ) { continue; }
-				if( TMath::Prob( conv->conversionVertex().chi2(), conv->conversionVertex().ndof() ) < 1e-6 ) { continue; }
+			if ( conv->nTracks() == 2 ) {
+				if ( !conv->isConverted() ) { continue; }
+				if ( conv->refittedPair4Momentum().pt() < 10. ) { continue; }
+				if ( TMath::Prob( conv->conversionVertex().chi2(), conv->conversionVertex().ndof() ) < 1e-6 ) { continue; }
 
 				TVector3 VtxtoSC;
 				VtxtoSC.SetXYZ( g->superCluster()->position().x() - conv->conversionVertex().x(),
-					g->superCluster()->position().y() - conv->conversionVertex().y(),
-					g->superCluster()->position().z() - conv->conversionVertex().z() );
+				                g->superCluster()->position().y() - conv->conversionVertex().y(),
+				                g->superCluster()->position().z() - conv->conversionVertex().z() );
 
 				TVector3 RefPairMo;
 				RefPairMo.SetXYZ( conv->refittedPairMomentum().x(), conv->refittedPairMomentum().y(), conv->refittedPairMomentum().z() );
 				double dR = 0;
 				dR = VtxtoSC.DeltaR( RefPairMo );
-				if( dR < mindR ) {
+				if ( dR < mindR ) {
 					mindR = dR;
 					selected_conversion_index = i;
 				}
 			}
 		}
 
-		if( mindR < 0.1 ) {
+		if ( mindR < 0.1 ) {
 			result.push_back( selected_conversion_index );
 			nConvLegs = 2;
 			result.push_back( nConvLegs );
 			doOneLeg = false;
 		}
-		if( doOneLeg ) {
+		if ( doOneLeg ) {
 			mindR = 999;
-			for( unsigned int j = 0; j < conversionsVectorSL.size(); j++ ) {
+			for ( unsigned int j = 0; j < conversionsVectorSL.size(); j++ ) {
 				edm::Ptr<reco::Conversion> conv = conversionsVectorSL[j];
 
-				if( conv->nTracks() == 1 ) {
+				if ( conv->nTracks() == 1 ) {
 					TVector3 VtxtoSC;
 					VtxtoSC.SetXYZ( g->superCluster()->position().x() - conv->conversionVertex().x(),
-						g->superCluster()->position().y() - conv->conversionVertex().y(),
-						g->superCluster()->position().z() - conv->conversionVertex().z() );
+					                g->superCluster()->position().y() - conv->conversionVertex().y(),
+					                g->superCluster()->position().z() - conv->conversionVertex().z() );
 					TVector3 RefPairMo;
 					float oneLegTrack_X = conv->tracksPin()[0].x();
 					float oneLegTrack_Y = conv->tracksPin()[0].y();
@@ -1111,14 +1109,14 @@ std::vector<int> ggNtuplizer::IndexMatchedConversion( edm::View<pat::Photon>::co
 					RefPairMo.SetXYZ( oneLegTrack_X, oneLegTrack_Y, oneLegTrack_Z );
 					double dR = 0;
 					dR = VtxtoSC.DeltaR( RefPairMo );
-					if( dR < mindR ) {
+					if ( dR < mindR ) {
 						mindR = dR;
 						selected_conversion_index = j;
-					}                  
+					}
 				}
 			}
 
-			if( mindR < 0.1 ) {
+			if ( mindR < 0.1 ) {
 				result.push_back( selected_conversion_index );
 				nConvLegs = 1;
 				result.push_back( nConvLegs );
@@ -1126,7 +1124,7 @@ std::vector<int> ggNtuplizer::IndexMatchedConversion( edm::View<pat::Photon>::co
 		}
 	}
 
-	if( mindR < 0.1 ){
+	if ( mindR < 0.1 ) {
 		return result;
 	} else {
 		result.push_back( -1 );
