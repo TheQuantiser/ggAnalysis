@@ -360,6 +360,13 @@ class ggNtuplizer : public edm::EDAnalyzer {
   edm::EDGetTokenT<double>                                 prefweight_token;
   edm::EDGetTokenT<double>                                 prefweightup_token;
   edm::EDGetTokenT<double>                                 prefweightdown_token;
+  edm::EDGetTokenT<double>                                 prefweightECAL_token;
+  edm::EDGetTokenT<double>                                 prefweightECALup_token;
+  edm::EDGetTokenT<double>                                 prefweightECALdown_token;
+  edm::EDGetTokenT<double>                                 prefweightMu_token;
+  edm::EDGetTokenT<double>                                 prefweightMuup_token;
+  edm::EDGetTokenT<double>                                 prefweightMudown_token;
+
 
   // for MET filters
   edm::EDGetTokenT<bool>                                   BadChCandFilterToken_;

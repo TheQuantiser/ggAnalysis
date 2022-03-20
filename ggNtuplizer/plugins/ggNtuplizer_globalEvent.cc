@@ -29,7 +29,17 @@ ULong64_t   HLTMetFWjetIsPrescaled_;
 Float_t     ecalPrefireW_;
 Float_t     ecalPrefireWup_;
 Float_t     ecalPrefireWdn_;
+// Float_t     ecalPrefireEcal_;
+// Float_t     ecalPrefireEcalUp_;
+// Float_t     ecalPrefireEcalDn_;
+// Float_t     ecalPrefireMu_;
+// Float_t     ecalPrefireMuUp_;
+// Float_t     ecalPrefireMuDn_;
+
 UShort_t    beamHaloSummary_;
+
+
+
 
 void ggNtuplizer::branchesGlobalEvent(TTree* tree) {
 
@@ -53,10 +63,17 @@ void ggNtuplizer::branchesGlobalEvent(TTree* tree) {
   tree->Branch("HLTPhoIsPrescaled",      & HLTPhoIsPrescaled_);
   tree->Branch("HLTJetIsPrescaled",      & HLTJetIsPrescaled_);
   tree->Branch("HLTMetFWjetIsPrescaled", & HLTMetFWjetIsPrescaled_);
+
   if (getECALprefiringWeights_) {
     tree->Branch("ecalPrefireW",         & ecalPrefireW_);
     tree->Branch("ecalPrefireWup",       & ecalPrefireWup_);
     tree->Branch("ecalPrefireWdn",       & ecalPrefireWdn_);
+    // tree->Branch("ecalPrefireEcal_",     & ecalPrefireEcal_);
+    // tree->Branch("ecalPrefireEcalUp_",   & ecalPrefireEcalUp_);
+    // tree->Branch("ecalPrefireEcalDn_",   & ecalPrefireEcalDn_);
+    // tree->Branch("ecalPrefireMu_",       & ecalPrefireMu_);
+    // tree->Branch("ecalPrefireMuUp_",     & ecalPrefireMuUp_);
+    // tree->Branch("ecalPrefireMuDn_",     & ecalPrefireMuDn_);
   }
   tree->Branch("beamHaloSummary",        & beamHaloSummary_);
 
@@ -233,5 +250,29 @@ void ggNtuplizer::fillGlobalEvent(const edm::Event& e, const edm::EventSetup& es
     edm::Handle<double> theprefweightdown;
     e.getByToken(prefweightdown_token, theprefweightdown ) ;
     ecalPrefireWdn_ = (*theprefweightdown);
+
+    // edm::Handle<double> theprefweightEcal;
+    // e.getByToken(prefweightECAL_token, theprefweightEcal ) ;
+    // ecalPrefireEcal_ = (*theprefweightEcal);
+
+    // edm::Handle<double> theprefweightEcalUp;
+    // e.getByToken(prefweightECALup_token, theprefweightEcalUp ) ;
+    // ecalPrefireEcalUp_ = (*theprefweightEcalUp);
+
+    // edm::Handle<double> theprefweightEcalDn;
+    // e.getByToken(prefweightECALdown_token, theprefweightEcalDn ) ;
+    // ecalPrefireEcalDn_ = (*theprefweightEcalDn);
+
+    // edm::Handle<double> theprefweightMu;
+    // e.getByToken(prefweightECAL_token, theprefweightMu ) ;
+    // ecalPrefireMu_ = (*theprefweightMu);
+
+    // edm::Handle<double> theprefweightMuUp;
+    // e.getByToken(prefweightMuup_token, theprefweightMuUp ) ;
+    // ecalPrefireMuUp_ = (*theprefweightMuUp);
+
+    // edm::Handle<double> theprefweightMuDn;
+    // e.getByToken(prefweightMudown_token, theprefweightMuDn ) ;
+    // ecalPrefireMuDn_ = (*theprefweightMuDn);
   }
 }

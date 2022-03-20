@@ -14,10 +14,10 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 ### MC: 102X_mcRun2_asymptotic_v8 (2016), 102X_mc2017_realistic_v8 (2017), 102X_upgrade2018_realistic_v21 (2018)
 process.GlobalTag = GlobalTag(process.GlobalTag, '102X_mc2017_realistic_v8')
 process.maxEvents = cms.untracked.PSet(
-    input=cms.untracked.int32(-1))
+    input=cms.untracked.int32(100))
 process.MessageLogger.cerr.FwkReport.reportEvery = 500
-process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('file:/afs/hep.wisc.edu/user/wadud/private/signal_production/CMSSW_10_6_29/src/genproductions/bin/MadGraph5_aMCatNLO/ZNuNuGproduction/aNTGC_ZNuNuG_MINIAODSIM.root'))
-# process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17MiniAOD/ZNuNuGJets_MonoPhoton_PtG-130_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/120000/FB8BC1E9-8578-B249-9F22-7E03D0330CB0.root'))
+# process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('file:/afs/hep.wisc.edu/user/wadud/private/signal_production/CMSSW_10_6_29/src/genproductions/bin/MadGraph5_aMCatNLO/ZNuNuGproduction/aNTGC_ZNuNuG_MINIAODSIM.root'))
+process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17MiniAOD/ZNuNuGJets_MonoPhoton_PtG-130_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/120000/FB8BC1E9-8578-B249-9F22-7E03D0330CB0.root'))
 
 print(process.source)
 
@@ -103,7 +103,7 @@ runMetCorAndUncFromMiniAOD(process,
                             recoMetFromPFCs=True,
                             jetFlavor="AK4PFPuppi",
                             reclusterJets = True,
-                            postfix="Puppi"
+                            postfix="PuppiUpdated"
                             )
 process.puppiNoLep.useExistingWeights = True
 process.puppi.useExistingWeights = True
@@ -116,14 +116,23 @@ process.puppi.useExistingWeights = True
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/L1ECALPrefiringWeightRecipe#Accessing_the_UL2017_maps
 # https://github.com/cms-sw/cmssw/blob/CMSSW_10_6_X/PhysicsTools/PatUtils/plugins/L1ECALPrefiringWeightProducer.cc
 # https://github.com/cms-sw/cmssw-cfipython/blob/371ab6d166e50056cb14b4dc03b5876eb5fa5940/PhysicsTools/PatUtils/l1ECALPrefiringWeightProducer_cfi.py
+
 from PhysicsTools.PatUtils.l1ECALPrefiringWeightProducer_cfi import l1ECALPrefiringWeightProducer
 process.prefiringweight = l1ECALPrefiringWeightProducer.clone(
-    TheJets = cms.InputTag("selectedPatJetsAK4PFCHSupdated"), 
-    L1Maps = cms.string("root://cmsxrootd.fnal.gov//store/user/mwadud/aNTGC/ECALL1Prefiring/L1PrefiringMaps.root"),
-    DataEra=cms.string("2017BtoF"),
-    UseJetEMPt=cms.bool(False),
-    PrefiringRateSystematicUncty=cms.double(0.2),
-    SkipWarnings=False)
+    TheJets = cms.InputTag("selectedPatJetsAK4PFCHSupdated"), #this should be the slimmedJets collection with up to date JECs !
+    DataEra = cms.string("2017BtoF"), #Use 2016BtoH for 2016
+    UseJetEMPt = cms.bool(False),
+    PrefiringRateSystematicUncty = cms.double(0.2),
+    SkipWarnings = False)
+
+# from PhysicsTools.PatUtils.l1ECALPrefiringWeightProducer_cfi import l1ECALPrefiringWeightProducer
+# process.prefiringweight = l1ECALPrefiringWeightProducer.clone(
+#     TheJets = cms.InputTag("selectedPatJetsAK4PFCHSupdated"), 
+#     L1Maps = cms.string("root://cmsxrootd.fnal.gov//store/user/mwadud/aNTGC/ECALL1Prefiring/L1PrefiringMaps.root"),
+#     DataEra=cms.string("2017BtoF"),
+#     UseJetEMPt=cms.bool(False),
+#     PrefiringRateSystematicUncty=cms.double(0.2),
+#     SkipWarnings=False)
 ##########################################################################
 
 
@@ -192,7 +201,7 @@ process.ggNtuplizer.ecalBadCalibFilter = cms.InputTag("ecalBadCalibReducedMINIAO
 ##########################################################################
 process.p = cms.Path(
     process.puppiMETSequence *
-    process.fullPatMetSequencePuppi *
+    process.fullPatMetSequencePuppiUpdated *
     process.fullPatMetSequenceModifiedPFMET *
     process.egammaPostRecoSeq *
     process.rerunMvaIsolationSequence *

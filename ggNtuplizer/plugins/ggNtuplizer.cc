@@ -17,6 +17,13 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
     prefweight_token              = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProb"));
     prefweightup_token            = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProbUp"));
     prefweightdown_token          = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProbDown"));
+    // prefweightECAL_token = consumes< double >(edm::InputTag("nonPrefiringProbECAL"));
+    // prefweightECALup_token = consumes< double >(edm::InputTag("nonPrefiringProbECALUp"));
+    // prefweightECALdown_token = consumes< double >(edm::InputTag("nonPrefiringProbECALDown"));
+    // prefweightMu_token = consumes< double >(edm::InputTag("nonPrefiringProbMuon"));
+    // prefweightMuup_token = consumes< double >(edm::InputTag("nonPrefiringProbMuonUp"));
+    // prefweightMudown_token = consumes< double >(edm::InputTag("nonPrefiringProbMuonDown"));
+
   }
 
 
@@ -35,7 +42,6 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) :
   dumpSoftDrop_               = ps.getParameter<bool>("dumpSoftDrop");
 
   dumpPDFSystWeight_          = ps.getParameter<bool>("dumpPDFSystWeight");
-  // dumpHFElectrons_            = ps.getParameter<bool>("dumpHFElectrons");
   year_                       = ps.getParameter<int>("year");
 
   trgFilterDeltaPtCut_        = ps.getParameter<double>("trgFilterDeltaPtCut");
@@ -214,7 +220,7 @@ void ggNtuplizer::analyze(const edm::Event& e, const edm::EventSetup& es) {
     fillECALOOTSC(e, es);
     resolveootPhoECALSCindex();
   }
-  
+
   if (dumpJets_) {
     fillAK4CHSJets(e,es);
     fillAK4PUPPIJets(e,es);

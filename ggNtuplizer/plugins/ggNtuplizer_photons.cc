@@ -82,16 +82,10 @@ vector<Float_t>      phoMIPSlope_;
 vector<Float_t>      phoMIPIntercept_;
 vector<Short_t>      phoMIPNhitCone_;
 vector<UChar_t>      phoIDbit_;
-vector<Float_t>      phoScale_stat_up_;
-vector<Float_t>      phoScale_stat_dn_;
-vector<Float_t>      phoScale_syst_up_;
-vector<Float_t>      phoScale_syst_dn_;
-vector<Float_t>      phoScale_gain_up_;
-vector<Float_t>      phoScale_gain_dn_;
-vector<Float_t>      phoResol_rho_up_;
-vector<Float_t>      phoResol_rho_dn_;
-vector<Float_t>      phoResol_phi_up_;
-vector<Float_t>      phoResol_phi_dn_;
+vector<Float_t>      phoPt_scale_up_;
+vector<Float_t>      phoPt_scale_dn_;
+vector<Float_t>      phoPt_sigma_up_;
+vector<Float_t>      phoPt_sigma_dn_;
 vector<Short_t>      pho_gen_index_;
 vector<int>          phoNConvLegs_;
 vector<float>        phoZVtxWithConv_;
@@ -189,16 +183,10 @@ void ggNtuplizer::branchesPhotons(TTree* tree) {
 	tree->Branch("phoMIPIntercept",           & phoMIPIntercept_);
 	tree->Branch("phoMIPNhitCone",            & phoMIPNhitCone_);
 	tree->Branch("phoIDbit",                  & phoIDbit_);
-	tree->Branch("phoScale_stat_up",          & phoScale_stat_up_);
-	tree->Branch("phoScale_stat_dn",          & phoScale_stat_dn_);
-	tree->Branch("phoScale_syst_up",          & phoScale_syst_up_);
-	tree->Branch("phoScale_syst_dn",          & phoScale_syst_dn_);
-	tree->Branch("phoScale_gain_up",          & phoScale_gain_up_);
-	tree->Branch("phoScale_gain_dn",          & phoScale_gain_dn_);
-	tree->Branch("phoResol_rho_up",           & phoResol_rho_up_);
-	tree->Branch("phoResol_rho_dn",           & phoResol_rho_dn_);
-	tree->Branch("phoResol_phi_up",           & phoResol_phi_up_);
-	tree->Branch("phoResol_phi_dn",           & phoResol_phi_dn_);
+	tree->Branch("phoPt_scale_up",          	  & phoPt_scale_up_);
+	tree->Branch("phoPt_scale_dn",              & phoPt_scale_dn_);
+	tree->Branch("phoPt_sigma_up",           	  & phoPt_sigma_up_);
+	tree->Branch("phoPt_sigma_dn",              & phoPt_sigma_dn_);
 	tree->Branch("phoNConvLegs",              & phoNConvLegs_);
 	tree->Branch("phoZVtxWithConv",           & phoZVtxWithConv_);
 	if(doGenParticles_){
@@ -288,16 +276,10 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 	phoMIPIntercept_                . clear();
 	phoMIPNhitCone_                 . clear();
 	phoIDbit_                       . clear();
-	phoScale_stat_up_               . clear();
-	phoScale_stat_dn_               . clear();
-	phoScale_syst_up_               . clear();
-	phoScale_syst_dn_               . clear();
-	phoScale_gain_up_               . clear();
-	phoScale_gain_dn_               . clear();
-	phoResol_rho_up_                . clear();
-	phoResol_rho_dn_                . clear();
-	phoResol_phi_up_                . clear();
-	phoResol_phi_dn_                . clear();
+	phoPt_scale_up_               	. clear();
+	phoPt_scale_dn_               	. clear();
+	phoPt_sigma_up_                	. clear();
+	phoPt_sigma_dn_                	. clear();
 	pho_gen_index_                  . clear();
 	phoZVtxWithConv_                . clear();
 	phoNConvLegs_                   . clear();
@@ -453,16 +435,11 @@ void ggNtuplizer::fillPhotons(const edm::Event& e, const edm::EventSetup& es) {
 		phoIDbit_.push_back(tmpphoIDbit);
 
 		// systematics for energy scale and resolution
-		phoScale_stat_up_ . push_back(iPho->userFloat("energyScaleStatUp"));
-		phoScale_stat_dn_ . push_back(iPho->userFloat("energyScaleStatDown"));
-		phoScale_syst_up_ . push_back(iPho->userFloat("energyScaleSystUp"));
-		phoScale_syst_dn_ . push_back(iPho->userFloat("energyScaleSystDown"));
-		phoScale_gain_up_ . push_back(iPho->userFloat("energyScaleGainUp"));
-		phoScale_gain_dn_ . push_back(iPho->userFloat("energyScaleGainDown"));
-		phoResol_rho_up_  . push_back(iPho->userFloat("energySigmaRhoUp"));
-		phoResol_rho_dn_  . push_back(iPho->userFloat("energySigmaRhoDown"));
-		phoResol_phi_up_  . push_back(iPho->userFloat("energySigmaPhiUp"));
-		phoResol_phi_dn_  . push_back(iPho->userFloat("energySigmaPhiDown"));
+		
+		phoPt_scale_up_ . push_back(iPho->et()*iPho->userFloat("energyScaleUp")/iPho->energy());
+		phoPt_scale_dn_ . push_back(iPho->et()*iPho->userFloat("energyScaleDown")/iPho->energy());
+		phoPt_sigma_up_  . push_back(iPho->et()*iPho->userFloat("energySigmaUp")/iPho->energy());
+		phoPt_sigma_dn_  . push_back(iPho->et()*iPho->userFloat("energySigmaDown")/iPho->energy());
 
 		bool isBarrel = (iPho->superCluster()->seed()->seed().subdetId() == EcalBarrel);
 		const EcalRecHitCollection * rechits = (isBarrel ? lazyToolnoZS.getEcalEBRecHitCollection() : lazyToolnoZS.getEcalEERecHitCollection());

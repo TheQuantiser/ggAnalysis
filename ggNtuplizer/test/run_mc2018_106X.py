@@ -112,23 +112,6 @@ process.puppi.useExistingWeights = True
 
 
 ##########################################################################
-# ECAL prefiring correction
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/L1ECALPrefiringWeightRecipe#Call_the_producer_in_your_config
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/L1ECALPrefiringWeightRecipe#Accessing_the_UL2017_maps
-# https://github.com/cms-sw/cmssw/blob/CMSSW_10_6_X/PhysicsTools/PatUtils/plugins/L1ECALPrefiringWeightProducer.cc
-# https://github.com/cms-sw/cmssw-cfipython/blob/371ab6d166e50056cb14b4dc03b5876eb5fa5940/PhysicsTools/PatUtils/l1ECALPrefiringWeightProducer_cfi.py
-from PhysicsTools.PatUtils.l1ECALPrefiringWeightProducer_cfi import l1ECALPrefiringWeightProducer
-process.prefiringweight = l1ECALPrefiringWeightProducer.clone(
-    TheJets = cms.InputTag("selectedPatJetsAK4PFCHSupdated"), 
-    L1Maps = cms.string("root://cmsxrootd.fnal.gov//store/user/mwadud/aNTGC/ECALL1Prefiring/L1PrefiringMaps.root"),
-    DataEra=cms.string("2017BtoF"),
-    UseJetEMPt=cms.bool(False),
-    PrefiringRateSystematicUncty=cms.double(0.2),
-    SkipWarnings=False)
-##########################################################################
-
-
-##########################################################################
 process.load("ggAnalysis.ggNtuplizer.ggNtuplizer_miniAOD_cfi")
 
 process.ggNtuplizer.year = cms.int32(2018)
@@ -136,7 +119,7 @@ process.ggNtuplizer.doGenParticles = cms.bool(True)
 process.ggNtuplizer.dumpPDFSystWeight = cms.bool(True)
 process.ggNtuplizer.dumpJets = cms.bool(True)
 process.ggNtuplizer.dumpTaus = cms.bool(True)
-process.ggNtuplizer.getECALprefiringWeights = cms.bool(True)
+process.ggNtuplizer.getECALprefiringWeights = cms.bool(False)
 process.ggNtuplizer.pfMETLabel=cms.InputTag("slimmedMETsModifiedPFMET")
 process.ggNtuplizer.puppiMETLabel=cms.InputTag("slimmedMETsPuppiUpdated")
 process.ggNtuplizer.ak4PFJetsCHSSrc = cms.InputTag("selectedPatJetsAK4PFCHSupdated")
@@ -201,7 +184,6 @@ process.p = cms.Path(
     process.egammaPostRecoSeq *
     process.rerunMvaIsolationSequence *
     getattr(process,updatedTauName) *
-    process.prefiringweight *
     process.ecalBadCalibReducedMINIAODFilter *
     process.ggNtuplizer
 )

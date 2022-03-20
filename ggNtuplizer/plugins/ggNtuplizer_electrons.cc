@@ -17,6 +17,10 @@ vector<float>  eleEn_;
 vector<float>  eleEcalEn_;
 vector<float>  eleSIP_;
 vector<float>  elePt_;
+vector<float>  elePt_scale_up_;
+vector<float>  elePt_scale_dn_;
+vector<float>  elePt_sigma_up_;
+vector<float>  elePt_sigma_dn_;
 vector<float>  elePtError_;
 vector<float>  eleEta_;
 vector<float>  elePhi_;
@@ -58,6 +62,10 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("eleEn",                   &eleEn_);
   tree->Branch("eleEcalEn",               &eleEcalEn_);
   tree->Branch("elePt",                   &elePt_);
+  tree->Branch("elePt_scale_up",          &elePt_scale_up_);
+  tree->Branch("elePt_scale_dn",          &elePt_scale_dn_);
+  tree->Branch("elePt_sigma_up",          &elePt_sigma_up_);
+  tree->Branch("elePt_sigma_dn" ,         &elePt_sigma_dn_);
   tree->Branch("elePtError",              &elePtError_);
   tree->Branch("eleEta",                  &eleEta_);
   tree->Branch("elePhi",                  &elePhi_);
@@ -74,7 +82,7 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("eledPhiAtVtx",            &eledPhiAtVtx_);
   tree->Branch("eleSigmaIEtaIEtaFull5x5", &eleSigmaIEtaIEtaFull5x5_);
   tree->Branch("eleSigmaIPhiIPhiFull5x5", &eleSigmaIPhiIPhiFull5x5_);
-  tree->Branch("eleQualityBits",             &eleQualityBits_);
+  tree->Branch("eleQualityBits",          &eleQualityBits_);
   tree->Branch("eleMissHits",             &eleMissHits_);
   tree->Branch("eleESEffSigmaRR",         &eleESEffSigmaRR_);
   tree->Branch("elePFChIso",              &elePFChIso_);
@@ -85,12 +93,12 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("elePFClusHcalIso",        &elePFClusHcalIso_);
   tree->Branch("eleIDMVAIso",             &eleIDMVAIso_);
   tree->Branch("eleIDMVANoIso",           &eleIDMVANoIso_);
-  tree->Branch("eleR9Full5x5",                &eleR9Full5x5_);
-  tree->Branch("eleFiredSingleTrgs",          &eleFiredSingleTrgs_);
-  tree->Branch("eleFiredDoubleTrgs",          &eleFiredDoubleTrgs_);
-  tree->Branch("eleFiredL1Trgs",              &eleFiredL1Trgs_);
-  tree->Branch("eleIDbit",                    &eleIDbit_);
-  if(doGenParticles_){
+  tree->Branch("eleR9Full5x5",            &eleR9Full5x5_);
+  tree->Branch("eleFiredSingleTrgs",      &eleFiredSingleTrgs_);
+  tree->Branch("eleFiredDoubleTrgs",      &eleFiredDoubleTrgs_);
+  tree->Branch("eleFiredL1Trgs",          &eleFiredL1Trgs_);
+  tree->Branch("eleIDbit",                &eleIDbit_);
+  if (doGenParticles_) {
     tree->Branch("eleGenIndex",          &eleGenIndex_);
   }
 
@@ -103,6 +111,10 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
   eleEn_                      .clear();
   eleEcalEn_                  .clear();
   elePt_                      .clear();
+  elePt_scale_up_                 .clear();
+  elePt_scale_dn_                 .clear();
+  elePt_sigma_up_                 .clear();
+  elePt_sigma_dn_                 .clear();
   elePtError_                 .clear();
   eleEta_                     .clear();
   elePhi_                     .clear();
@@ -161,13 +173,19 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
     elePt_              .push_back(iEle->pt());
     eleCalibPt_         .push_back(iEle->userFloat("ecalTrkEnergyPostCorr")*iEle->pt()/iEle->p());
     elePtError_         .push_back(iEle->userFloat("ecalTrkEnergyErrPostCorr")*iEle->pt()/iEle->p());
+
+    elePt_scale_up_     .push_back(iEle->userFloat("energyScaleUp")*iEle->pt()/iEle->p());;
+    elePt_scale_dn_     .push_back(iEle->userFloat("energyScaleDown")*iEle->pt()/iEle->p());;
+    elePt_sigma_up_     .push_back(iEle->userFloat("energySigmaUp")*iEle->pt()/iEle->p());;
+    elePt_sigma_dn_     .push_back(iEle->userFloat("energySigmaDown")*iEle->pt()/iEle->p());;
+
     eleEta_             .push_back(iEle->eta());
     elePhi_             .push_back(iEle->phi());
     eleR9_              .push_back(iEle->r9());
     // eleSCEn_            .push_back(iEle->superCluster()->energy());
     eleEcalEn_          .push_back(iEle->ecalEnergy());
 
-    if(ecalSChandle.isValid()){
+    if (ecalSChandle.isValid()) {
       const reco::SuperCluster * _tmpeleSC = (iEle->superCluster().isAvailable()) ? iEle->superCluster().get() : nullptr;
       Short_t tmpeleSCindex = (_tmpeleSC == nullptr) ? -999 : std::distance(ecalSChandle->begin(), (std::vector<reco::SuperCluster>::const_iterator) _tmpeleSC);
       eleSCindex_.push_back(tmpeleSCindex);
@@ -186,12 +204,12 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
     eledEtaAtVtx_       .push_back(iEle->deltaEtaSuperClusterTrackAtVtx());
     eledPhiAtVtx_       .push_back(iEle->deltaPhiSuperClusterTrackAtVtx());
     UShort_t tmpeleQualityBits = 0;
-    if(iEle->passConversionVeto()) setbit(tmpeleQualityBits, 0);
-    if(iEle->ecalDrivenSeed()) setbit(tmpeleQualityBits, 1);
-    if(iEle->ecalDriven()) setbit(tmpeleQualityBits, 2);
-    if(iEle->trackerDrivenSeed()) setbit(tmpeleQualityBits, 4);
-    if(iEle->isGsfCtfScPixChargeConsistent()) setbit(tmpeleQualityBits, 6);
-    
+    if (iEle->passConversionVeto()) setbit(tmpeleQualityBits, 0);
+    if (iEle->ecalDrivenSeed()) setbit(tmpeleQualityBits, 1);
+    if (iEle->ecalDriven()) setbit(tmpeleQualityBits, 2);
+    if (iEle->trackerDrivenSeed()) setbit(tmpeleQualityBits, 4);
+    if (iEle->isGsfCtfScPixChargeConsistent()) setbit(tmpeleQualityBits, 6);
+
 
     eleQualityBits_.push_back(tmpeleQualityBits);
 
@@ -236,7 +254,7 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
     elePFClusHcalIso_.push_back(iEle->hcalPFClusterIso());
 
 
-    if(doGenParticles_){
+    if (doGenParticles_) {
       edm::Handle<vector<reco::GenParticle>> genParticlesHandle;
       e.getByToken(genParticlesCollection_, genParticlesHandle);
       const reco::GenParticle * eleGen_ = iEle->genParticle();
@@ -249,14 +267,14 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
 };
 
 
-void ggNtuplizer::branchesEleECALSC(TTree* tree){
+void ggNtuplizer::branchesEleECALSC(TTree* tree) {
   tree->Branch("eleDirectEcalSCindex",                        &eleDirectEcalSCindex_);
 };
 
 
-void ggNtuplizer::resolveEleECALSCindex(){
+void ggNtuplizer::resolveEleECALSCindex() {
   eleDirectEcalSCindex_.clear();
-  for(Short_t scIndex : eleSCindex_){
+  for (Short_t scIndex : eleSCindex_) {
     Short_t resolvedIndex = findSecondaryIndex(scIndex, ecalSCindex_);
     eleDirectEcalSCindex_.push_back(resolvedIndex);
   }
