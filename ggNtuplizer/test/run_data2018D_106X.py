@@ -16,29 +16,11 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 ### Recalibrate ECAL rechit timing https://hypernews.cern.ch/HyperNews/CMS/get/ecal-calibration/1633.html
 ### https://indico.cern.ch/event/966025/contributions/4170419/attachments/2170447/3664371/ECALDPG_2021_1_13.pdf
 from CondCore.CondDB.CondDB_cfi import *
-process.GlobalTag = cms.ESSource("PoolDBESSource",
-                                 CondDB.clone(connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS')),
-                                 globaltag = cms.string('102X_dataRun2_Prompt_v16'),
-                                 # Get time calibration (corrections) tag
-                                 toGet = cms.VPSet(cms.PSet(record = cms.string("EcalTimeCalibConstantsRcd"),
-                                                  tag = cms.string("EcalTimeCalibConstants_2018_RunD_UL_Corr_v2"),
-                                                  connect = cms.string("sqlite_file:EcalTimeCalibConstants_2018_RunD_UL_Corr_v2.db"),
-                                          )
-                                 )
-)
-
-process.load("RecoLocalCalo.EcalRecProducers.ecalRecalibRecHit_cfi")
-process.ecalRecalibRecHit.EBRecHitCollection        = cms.InputTag("reducedEgamma", "reducedEBRecHits")
-process.ecalRecalibRecHit.EERecHitCollection        = cms.InputTag("reducedEgamma", "reducedEERecHits")
-process.ecalRecalibRecHit.EBRecalibRecHitCollection = cms.string('recalibEcalRecHitsEB')
-process.ecalRecalibRecHit.EERecalibRecHitCollection = cms.string('recalibEcalRecHitsEE')
-process.ecalRecalibRecHit.doTimeCalib               = True
-process.recalib_sequence                            = cms.Sequence(process.ecalRecalibRecHit)
-
+process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Prompt_v16')
 
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(100))
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('file:2018D_DatTest.root'))
+process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring('root://cmsxrootd.fnal.gov///store/data/Run2018D/EGamma/MINIAOD/12Nov2019_UL2018-v8/270000/F9BA2BDB-0606-8649-AFA2-9AF23B36C19B.root'))
 
 print(process.source)
 
@@ -164,8 +146,6 @@ process.ggNtuplizer.triggerEvent = cms.InputTag("slimmedPatTrigger", "", "RECO")
 process.ggNtuplizer.triggerResults = cms.InputTag("TriggerResults", "", "HLT")
 process.ggNtuplizer.patTriggerResults = cms.InputTag("TriggerResults", "", "RECO")
 process.ggNtuplizer.isoTrkSrc = cms.InputTag("isolatedTracks", "", "RECO")
-process.ggNtuplizer.ebReducedRecHitCollection = cms.InputTag("ecalRecalibRecHit", "recalibEcalRecHitsEB")
-process.ggNtuplizer.eeReducedRecHitCollection = cms.InputTag("ecalRecalibRecHit", "recalibEcalRecHitsEE")
 ##########################################################################
 
 
@@ -200,8 +180,7 @@ baddetEcallist = cms.vuint32(
     872421414,872421031,872423083,872421439])
 
 process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter("EcalBadCalibFilter",
-                                                      # EcalRecHitSource=cms.InputTag("reducedEgamma:reducedEERecHits"),
-                                                      EcalRecHitSource=cms.InputTag("ecalRecalibRecHit:recalibEcalRecHitsEE"),
+                                                      EcalRecHitSource=cms.InputTag("reducedEgamma:reducedEERecHits"),
                                                       ecalMinEt=cms.double(50.),
                                                       baddetEcal=baddetEcallist,
                                                       taggingMode=cms.bool(True),
@@ -342,7 +321,6 @@ process.triggerSelection = cms.EDFilter( "TriggerResultsFilter",
 ##########################################################################
 process.p = cms.Path(
     process.triggerSelection *
-    process.recalib_sequence *
     process.puppiMETSequence *
     process.fullPatMetSequencePuppiUpdated *
     process.fullPatMetSequenceModifiedPFMET *
